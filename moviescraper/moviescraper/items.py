@@ -18,5 +18,5 @@ class MoviescraperItem(scrapy.Item):
     realisateur = scrapy.Field()
     public = scrapy.Field()
     pays = scrapy.Field()
-    url = scrapy.Field()
+    url_image = scrapy.Field()
     langue = scrapy.Field()
