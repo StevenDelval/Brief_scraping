@@ -7,6 +7,16 @@ import scrapy
 
 
 class MoviescraperItem(scrapy.Item):
-    # define the fields for your item here like:
-    # name = scrapy.Field()
-    pass
+    titre = scrapy.Field()
+    titre_original = scrapy.Field()
+    score = scrapy.Field()
+    genre = scrapy.Field()
+    date = scrapy.Field()
+    duree = scrapy.Field()
+    descriptions = scrapy.Field()
+    acteurs = scrapy.Field()
+    realisateur = scrapy.Field()
+    public = scrapy.Field()
+    pays = scrapy.Field()
+    url = scrapy.Field()
+    langue = scrapy.Field()
