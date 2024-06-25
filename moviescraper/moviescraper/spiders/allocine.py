@@ -6,12 +6,12 @@ from ..items import MoviescraperItem
 class AllocineSpider(CrawlSpider):
     name = "allocine"
     allowed_domains = ["allocine.fr"]
-    start_urls = [f"https://www.allocine.fr/film/meilleurs/?page={page}" for page in range(1, 2)]
+    start_urls = [f"https://www.allocine.fr/film/meilleurs/?page={page}" for page in range(1, 4)]
     
 
     link_allo_details = LinkExtractor(restrict_xpaths="//h2/a")
     
-    rule_allo_details= Rule(link_allo_details, callback='parse_item', follow=True)
+    rule_allo_details= Rule(link_allo_details, callback='parse_item', follow=False)
     
     rules = (
         rule_allo_details,
@@ -23,4 +23,18 @@ class AllocineSpider(CrawlSpider):
 
     def parse_item(self, response):
         item = MoviescraperItem()
-        print("ok")
+        item["titre"] = ''.join(response.xpath("//div[@class='titlebar-title titlebar-title-xl']/text()").extract())
+        item["titre_original"] = ""
+        item["score"] = ""
+        item["genre"] = ""
+        item["date"] = ""
+        item["duree"] = ""
+        item["descriptions"] = ""
+        item["acteurs"] = ""
+        item["realisateur"] = ""
+        item["public"] = ""
+        item["pays"] = ""
+        item["url_image"] = ""
+        item["langue"] = ""
+        
+        yield item
