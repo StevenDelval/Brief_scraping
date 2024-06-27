@@ -1,9 +1,7 @@
 import scrapy
-from scrapy_splash import SplashRequest
 from scrapy.linkextractors import LinkExtractor
 from scrapy.spiders import CrawlSpider, Rule
 from ..items import MoviescraperItem
-
 
 class AllocineSpider(CrawlSpider):
     name = "allocine"
@@ -17,34 +15,25 @@ class AllocineSpider(CrawlSpider):
     
     # Define rules for the spider
     rules = (
-        Rule(link_next_page, follow=True, process_request='process_splash_request'),  # Follow next page links
-        Rule(link_allo_details, callback='parse_item', follow=False),  # Extract movie details
+        Rule(link_next_page,callback="parse_start_url"),  # Follow next page links
+        # Rule(link_allo_details, callback='parse_item', follow=False),  # Extract movie details
     )
-
-    def process_splash_request(self, request):
-        return SplashRequest(
-            url=request.url,
-            callback=self.parse_start_url,
-            args={'wait': 5, 'html': 1}
-        )
 
     def start_requests(self):
         for url in self.start_urls:
-            yield SplashRequest(url, self.parse_start_url, args={'wait': 5, 'html': 1})
-
-
+            yield scrapy.Request(url, meta={"playwright": True})
+    
+    
     def parse_start_url(self, response):
         # Follow movie detail links
         links = self.link_allo_details.extract_links(response)
-        print(response.xpath("//a[@class='xXx button button-md button-primary-full button-right']"))
         next_page = self.link_next_page.extract_links(response)
-        print("un lien : \n\n\n\n",next_page)
-        for link in links[0:1]:
-            yield SplashRequest(link.url, self.parse_item, args={'wait': 5, 'html': 1})
+        for link in links:
+            yield scrapy.Request(link.url, self.parse_item, meta={"playwright": True})
 
         # Follow next page link
         if next_page:
-            yield SplashRequest(response.urljoin(next_page), self.parse_start_url, args={'wait': 5, 'html': 1})
+            yield scrapy.Request(next_page[0].url, self.parse_start_url, meta={"playwright": True})        
 
     def parse_item(self, response):
         item = MoviescraperItem()
