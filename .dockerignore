@@ -1,0 +1,26 @@
+# Ignore les fichiers et dossiers qui ne sont pas nécessaires pour l'image Docker
+.git
+node_modules
+npm-debug.log
+
+# Ignorer les fichiers de build et les artefacts
+Dockerfile*
+docker-compose*
+*.md
+*.yml
+*.lock
+
+# Ignorer les fichiers système cachés
+..?*
+*/.gitkeep
+
+# Ignorer les fichiers de test
+/test
+/tests
+/__tests__
+
+# Ignorer les fichiers de configuration IDE
+.idea
+.vscode
+
+.env
