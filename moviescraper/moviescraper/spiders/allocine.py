@@ -1,3 +1,5 @@
+import os
+from dotenv import load_dotenv
 import scrapy
 from scrapy.linkextractors import LinkExtractor
 from scrapy.spiders import CrawlSpider, Rule
@@ -7,7 +9,7 @@ class AllocinespiderSpider(CrawlSpider):
     name = 'allocine'
     allowed_domains = ["allocine.fr"]
     start_urls = ["https://www.allocine.fr/film/meilleurs"]
-
+    
     rules = (
         Rule(LinkExtractor(restrict_xpaths="//h2/a"), callback='parse_item', follow=False, process_request='use_playwright'),
         Rule(LinkExtractor(restrict_xpaths="//span[@class='txt' and text()='Suivante']/.."), follow=True, process_request='use_playwright'),
@@ -28,9 +30,9 @@ class AllocinespiderSpider(CrawlSpider):
         item["score"] = ''.join(response.xpath("//div[@class='rating-item']/div/a[contains(text(), ' Spectateurs ')]/../div/span[@class='stareval-note']/text()").extract())
         item["genre"] = ', '.join(response.xpath("//span[@class='spacer'][2]/following-sibling::a/text()").extract())
         item["date"] = ''.join(response.xpath("//a[@class='xXx date blue-link']/text()").extract())
-        item["duree"] = ''.join(response.xpath("//span[@class='spacer'][1]/following-sibling::text()[1]/text()").extract())
-        item["descriptions"] = ''.join(response.xpath("//a[@class='xXx date blue-link']/text()").extract())
-        item["acteurs"] = ', '.join(response.xpath("//p[@class='bo-p']/text()").extract())
+        item["duree"] = ''.join(response.xpath("//span[@class='spacer'][1]/following-sibling::text()[1]").extract())
+        item["descriptions"] = ''.join(response.xpath("//p[@class='bo-p']/text()").extract())
+        item["acteurs"] = ', '.join(response.xpath("//div/span[contains(text(), 'Avec')]/../a/text()").extract())
         item["realisateur"] = ''.join(response.xpath("//div/span[contains(text(), 'De')]/../a/text()").extract())
         item["public"] = ''.join(response.xpath("//div[@class='certificate']/span[@class='certificate-text']/text()").extract())
         item["pays"] = ''.join(response.xpath("//a[@class='xXx nationality']/text()").extract())

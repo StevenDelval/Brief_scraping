@@ -68,9 +68,10 @@ DEFAULT_REQUEST_HEADERS = {
 
 # Configure item pipelines
 # See https://docs.scrapy.org/en/latest/topics/item-pipeline.html
-#ITEM_PIPELINES = {
-#    "moviescraper.pipelines.MoviescraperPipeline": 300,
-#}
+ITEM_PIPELINES = {
+   "moviescraper.pipelines.MoviescraperPipeline": 200,
+#    "moviescraper.pipelines.DataBasePipeline": 300,
+}
 
 # Enable and configure the AutoThrottle extension (disabled by default)
 # See https://docs.scrapy.org/en/latest/topics/autothrottle.html
@@ -95,5 +96,4 @@ DEFAULT_REQUEST_HEADERS = {
 
 # Set settings whose default value is deprecated to a future-proof value
 REQUEST_FINGERPRINTER_IMPLEMENTATION = "2.7"
-TWISTED_REACTOR = "twisted.internet.asyncioreactor.AsyncioSelectorReactor"
 FEED_EXPORT_ENCODING = "utf-8"
