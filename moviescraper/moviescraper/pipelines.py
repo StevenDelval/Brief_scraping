@@ -5,10 +5,14 @@
 
 
 # useful for handling different item types with a single interface
-from itemadapter import ItemAdapter
-import datetime
+from datetime import datetime
 import locale
 import re
+from itemadapter import ItemAdapter
+from sqlalchemy.orm import sessionmaker
+from .models import Film, Acteur, Genre, Langue, engine, film_acteur, film_genre, film_langue
+from scrapy.exceptions import DropItem
+
 locale.setlocale(locale.LC_TIME, 'fr_FR.UTF-8')
 
 def convertion_duree(str):
@@ -37,9 +41,9 @@ def convertion_duree(str):
 
 def convert_date(date_str):
     # Convertir la chaîne de caractères en objet datetime
-    date_obj = datetime.datetime.strptime(date_str, "%d %B %Y")
+    date_obj = datetime.strptime(date_str, "%d %B %Y")
     # Formater l'objet datetime en chaîne de caractères au format dd/mm/yyyy
-    formatted_date = date_obj.strftime("%d/%m/%Y")
+    formatted_date = date_obj.strftime("%d-%m-%Y")
     return formatted_date
 
 class MoviescraperPipeline:
@@ -87,68 +91,76 @@ class MoviescraperPipeline:
 
         return item
 
+class SQLAlchemyPipeline(object):
+    def __init__(self):
+        self.Session = sessionmaker(bind=engine)
 
-# class DataBasePipeline:
-    
-#     def open_spider(self, spider):
-#         try:
-#             self.connection = pymysql.connect(
-#                 host="localhost",
-#                 user="root",
-#                 password=PASSWORD,
-#                 database="BooksScrapy" 
-#             )
-#         except pymysql.err.OperationalError as e:
-#             if e.args[0] == 1049:
-#                 raise Exception("Erreur : La base de données 'BooksScrapy' n'existe pas.")
-#             elif e.args[0] == 1045:
-#                 raise Exception("Erreur : Accès refusé pour l'utilisateur 'root'@'localhost' (mot de passe incorrect).")
-#             else:
-#                 raise Exception(f"Erreur de connexion : {e}")
- 
-#         try:
-#             self.cursor = self.connection.cursor()
-#             self.cursor.execute("""
-#                 CREATE TABLE IF NOT EXISTS books (
-#                     id SERIAL PRIMARY KEY,
-#                     title TEXT,
-#                     image TEXT,
-#                     description TEXT,
-#                     UPC TEXT,
-#                     product_type TEXT,
-#                     price FLOAT,
-#                     price_tax FLOAT,
-#                     tax FLOAT,
-#                     availability INTEGER,
-#                     number_of_reviews INTEGER
-#                 );
-#             """)
-#             self.connection.commit()
-#         except Exception as e:
-#             self.connection.close()
-#             raise Exception(f"Erreur lors de la création de la table : {e}")
-
-
-
-#     def process_item(self, item, spider):
-#         self.cursor.execute("""
-#             INSERT INTO books (title, image, description, UPC, product_type, price, price_tax, tax, availability, number_of_reviews)
-#             VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s);
-#         """, (
-#             item['title'],
-#             item['image'],
-#             item['description'],
-#             item['UPC'],
-#             item['product_type'],
-#             item['price'],
-#             item['price_tax'],
-#             item['tax'],
-#             item['availability'],
-#             item['number_of_reviews']
-#         ))
-#         self.connection.commit()
-#         return item
-
-#     def close_spider(self, spider):
-#         self.cursor.close()
-#         self.connection.close()
+    def process_item(self, item, spider):
+        session = self.Session()
+        try:
+            film = Film(
+                titre=item['titre'],
+                titre_original=item['titre_original'],
+                score=item['score'],
+                date=item['date'],
+                duree=item['duree'],
+                descriptions=item['descriptions'],
+                realisateur=item['realisateur'],
+                public=item['public'],
+                pays=item['pays'],
+                url_image=item['url_image']
+            )
+            session.add(film)
+            session.commit()
+        except Exception as e:
+            session.rollback()
+            print(f"Error saving item: {e}")
+            raise DropItem(f"Error saving item: {e}")
+        
+        for acteur_item in item["acteurs"].split(", "):
+            acteur_item_split = acteur_item.split(" ")
+            try:
+                acteur = Acteur(
+                     acteur_first_name=str("".join(acteur_item_split[0:-1])),
+                     acteur_last_name=str(acteur_item_split[-1]),
+                )
+                session.add(acteur)
+                session.commit()
+            except Exception as e:
+                session.rollback()
+                print(f"Error saving item: {e}")
+                raise DropItem(f"Error saving item: {e}")
+            finally:
+                continue
+            
+        for genre_item in item["genre"].split(", "):
+            print(genre_item)
+            try:
+                genre = Genre(
+                     genre_name=genre_item,
+                )
+                session.add(genre)
+                session.commit()
+            except Exception as e:
+                session.rollback()
+                print(f"Error saving item: {e}")
+                raise DropItem(f"Error saving item: {e}")
+            finally:
+                continue
+        for langue_item in item["langue"].split(", "):
+            print(langue_item)
+            try:
+                langue = Langue(
+                     langue_name=langue_item,
+                )
+                session.add(langue)
+                session.commit()
+            except Exception as e:
+                session.rollback()
+                print(f"Error saving item: {e}")
+                raise DropItem(f"Error saving item: {e}")
+            finally:
+                continue
+        session.close()
+        
+        return item
