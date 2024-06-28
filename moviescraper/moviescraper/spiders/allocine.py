@@ -30,6 +30,8 @@ class AllocinespiderSpider(CrawlSpider):
         item["score"] = ''.join(response.xpath("//div[@class='rating-item']/div/a[contains(text(), ' Spectateurs ')]/../div/span[@class='stareval-note']/text()").extract())
         item["genre"] = ', '.join(response.xpath("//span[@class='spacer'][2]/following-sibling::a/text()").extract())
         item["date"] = ''.join(response.xpath("//a[@class='xXx date blue-link']/text()").extract())
+        if item["date"] == "":
+            item["date"] = ''.join(response.xpath("//span[@class='date']/text()").extract())
         item["duree"] = ''.join(response.xpath("//span[@class='spacer'][1]/following-sibling::text()[1]").extract())
         item["descriptions"] = ''.join(response.xpath("//p[@class='bo-p']/text()").extract())
         item["acteurs"] = ', '.join(response.xpath("//div/span[contains(text(), 'Avec')]/../a/text()").extract())
