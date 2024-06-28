@@ -39,6 +39,6 @@ class AllocinespiderSpider(CrawlSpider):
         item["public"] = ''.join(response.xpath("//div[@class='certificate']/span[@class='certificate-text']/text()").extract())
         item["pays"] = ''.join(response.xpath("//a[@class='xXx nationality']/text()").extract())
         item["url_image"] = ''.join(response.xpath("//div[@class='card entity-card entity-card-list cf entity-card-player-ovw']/figure/a/img/@src").extract())
-        item["langue"] = ''.join(response.xpath("//div[@class='item']/span[contains(text(), 'Langues')]/following-sibling::span[1]/text()").extract())
+        item["langue"] = ', '.join(response.xpath("//div[@class='item']/span[contains(text(), 'Langues')]/following-sibling::span[1]/text()").extract())
         
         yield item
