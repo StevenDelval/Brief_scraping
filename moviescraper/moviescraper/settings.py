@@ -70,7 +70,7 @@ DEFAULT_REQUEST_HEADERS = {
 # See https://docs.scrapy.org/en/latest/topics/item-pipeline.html
 ITEM_PIPELINES = {
    "moviescraper.pipelines.MoviescraperPipeline": 200,
-#    "moviescraper.pipelines.DataBasePipeline": 300,
+   "moviescraper.pipelines.SQLAlchemyPipeline": 300,
 }
 
 # Enable and configure the AutoThrottle extension (disabled by default)
