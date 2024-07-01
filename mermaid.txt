@@ -1,0 +1,51 @@
+erDiagram
+    FILM {
+        string titre PK
+        string titre_original
+        float score
+        date date PK
+        int duree
+        string descriptions
+        string realisateur PK
+        string public
+        string pays
+        string url_image
+    }
+    ACTEURS {
+        int acteur_id PK
+        string acteur_first_name
+        string acteur_last_name
+    }
+    GENRE {
+        int genre_id PK
+        string genre_name
+    }
+    LANGUE {
+        int langue_id PK
+        string langue_name
+    }
+    FILM_ACTEUR {
+        string film_titre PK,FK
+        date film_date PK,FK
+        string film_realisateur PK,FK
+        int acteur_id PK,FK
+    }
+    FILM_GENRE {
+        string film_titre PK,FK
+        date film_date PK,FK
+        string film_realisateur PK,FK
+        int genre_id PK,FK
+    }
+    FILM_LANGUE {
+        string film_titre PK,FK
+        date film_date PK,FK
+        string film_realisateur PK,FK
+        int langue_id PK,FK
+    }
+
+    FILM ||--o{ FILM_ACTEUR : has
+    ACTEURS ||--o{ FILM_ACTEUR : participates_in
+    FILM ||--o{ FILM_GENRE : categorized_as
+    GENRE ||--o{ FILM_GENRE : is_part_of
+    FILM ||--o{ FILM_LANGUE : is_in
+    LANGUE ||--o{ FILM_LANGUE : spoken_in
