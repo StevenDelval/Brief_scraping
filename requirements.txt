@@ -4,3 +4,4 @@ scrapy-playwright==0.0.36
 playwright==1.44.0
 python-dotenv==1.0.1
 sqlalchemy==2.0.31
+psycopg2-binary==2.9.9
