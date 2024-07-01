@@ -2,19 +2,34 @@
 from sqlalchemy import create_engine, Column, String, Integer, Float, Date, ForeignKey, Table
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship, sessionmaker
+import os 
 from dotenv import load_dotenv
 load_dotenv()
 
 
-bdd_path = 'sqlite:///database.db'
+if bool(int(os.getenv("IS_POSTGRES"))):
+    username = os.getenv("DB_USERNAME")
+    hostname = os.getenv("DB_HOSTNAME")
+    port = os.getenv("DB_PORT")
+    database_name = os.getenv("DB_NAME")
+    password = os.getenv("DB_PASSWORD")
+    bdd_path = f"postgresql://{username}:{password}@{hostname}:{port}/{database_name}"
+else:
+    bdd_path = 'sqlite:///database.db'
 
+engine = create_engine(bdd_path)
 Base = declarative_base()
+print(engine.dialect.name)
+if engine.dialect.name == 'sqlite':
+    date_type = String
+else:
+    date_type = Date
 
 # Define association tables first
 film_acteur = Table(
     'film_acteur', Base.metadata,
     Column('film_titre', String, ForeignKey('film.titre')),
-    Column('film_date', Date, ForeignKey('film.date')),
+    Column('film_date', date_type, ForeignKey('film.date')),
     Column('film_realisateur', String, ForeignKey('film.realisateur')),
     Column('acteur_id', Integer, ForeignKey('acteurs.acteur_id'))
 )
@@ -22,7 +37,7 @@ film_acteur = Table(
 film_genre = Table(
     'film_genre', Base.metadata,
     Column('film_titre', String, ForeignKey('film.titre')),
-    Column('film_date', Date, ForeignKey('film.date')),
+    Column('film_date', date_type, ForeignKey('film.date')),
     Column('film_realisateur', String, ForeignKey('film.realisateur')),
     Column('genre_id', Integer, ForeignKey('genre.genre_id'))
 )
@@ -30,7 +45,7 @@ film_genre = Table(
 film_langue = Table(
     'film_langue', Base.metadata,
     Column('film_titre', String, ForeignKey('film.titre')),
-    Column('film_date', Date, ForeignKey('film.date')),
+    Column('film_date', date_type, ForeignKey('film.date')),
     Column('film_realisateur', String, ForeignKey('film.realisateur')),
     Column('langue_id', Integer, ForeignKey('langue.langue_id'))
 )
@@ -42,7 +57,7 @@ class Film(Base):
     titre = Column(String, primary_key=True)
     titre_original = Column(String)
     score = Column(Float)
-    date = Column(String, primary_key=True)
+    date = Column(date_type, primary_key=True)
     duree = Column(Integer)
     descriptions = Column(String)
     realisateur = Column(String, ForeignKey('acteurs.acteur_id'), primary_key=True)
@@ -74,26 +89,22 @@ class Film(Base):
 class Acteur(Base):
     __tablename__ = 'acteurs'
 
-    acteur_id = Column(Integer,default=0, autoincrement=True)
-    acteur_first_name = Column(String, primary_key=True)
-    acteur_last_name = Column(String, primary_key=True)
+    acteur_id = Column(Integer, primary_key=True, autoincrement=True)
+    acteur_first_name = Column(String)
+    acteur_last_name = Column(String)
 
 class Genre(Base):
     __tablename__ = 'genre'
 
-    genre_id = Column(Integer,default=0, autoincrement=True)
-    genre_name = Column(String, primary_key=True)
+    genre_id = Column(Integer, primary_key=True, autoincrement=True)
+    genre_name = Column(String)
 
 class Langue(Base):
     __tablename__ = 'langue'
 
-    langue_id = Column(Integer,default=0, autoincrement=True)
-    langue_name = Column(String, primary_key=True)
+    langue_id = Column(Integer, primary_key=True, autoincrement=True)
+    langue_name = Column(String)
 
 # Configuration de la base de données (remplacez 'sqlite:///database.db' par votre base de données)
 engine = create_engine(bdd_path)
 Base.metadata.create_all(engine)
-
-# Création d'une session
-Session = sessionmaker(bind=engine)
-session = Session()
