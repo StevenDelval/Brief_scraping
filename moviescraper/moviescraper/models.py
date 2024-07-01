@@ -1,5 +1,5 @@
 
-from sqlalchemy import create_engine, Column, String, Integer, Float, Date, ForeignKey, Table
+from sqlalchemy import create_engine, Column, String, Integer, Float, Date, ForeignKey, Table, PrimaryKeyConstraint,ForeignKeyConstraint
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship, sessionmaker
 import os 
@@ -28,26 +28,35 @@ else:
 # Define association tables first
 film_acteur = Table(
     'film_acteur', Base.metadata,
-    Column('film_titre', String, ForeignKey('film.titre')),
-    Column('film_date', date_type, ForeignKey('film.date')),
-    Column('film_realisateur', String, ForeignKey('film.realisateur')),
-    Column('acteur_id', Integer, ForeignKey('acteurs.acteur_id'))
+    Column('film_titre', String),
+    Column('film_date', date_type),
+    Column('film_realisateur', String),
+    Column('acteur_id', Integer, ForeignKey('acteurs.acteur_id')),
+    ForeignKeyConstraint(['film_titre', 'film_date', 'film_realisateur'], 
+                         ['film.titre', 'film.date', 'film.realisateur']),
+    PrimaryKeyConstraint('film_titre', 'film_date', 'film_realisateur', 'acteur_id')
 )
 
 film_genre = Table(
     'film_genre', Base.metadata,
-    Column('film_titre', String, ForeignKey('film.titre')),
-    Column('film_date', date_type, ForeignKey('film.date')),
-    Column('film_realisateur', String, ForeignKey('film.realisateur')),
-    Column('genre_id', Integer, ForeignKey('genre.genre_id'))
+    Column('film_titre', String),
+    Column('film_date', date_type),
+    Column('film_realisateur', String),
+    Column('genre_id', Integer, ForeignKey('genre.genre_id')),
+    ForeignKeyConstraint(['film_titre', 'film_date', 'film_realisateur'], 
+                         ['film.titre', 'film.date', 'film.realisateur']),
+    PrimaryKeyConstraint('film_titre', 'film_date', 'film_realisateur', 'genre_id')
 )
 
 film_langue = Table(
     'film_langue', Base.metadata,
-    Column('film_titre', String, ForeignKey('film.titre')),
-    Column('film_date', date_type, ForeignKey('film.date')),
-    Column('film_realisateur', String, ForeignKey('film.realisateur')),
-    Column('langue_id', Integer, ForeignKey('langue.langue_id'))
+    Column('film_titre', String),
+    Column('film_date', date_type),
+    Column('film_realisateur', String),
+    Column('langue_id', Integer, ForeignKey('langue.langue_id')),
+    ForeignKeyConstraint(['film_titre', 'film_date', 'film_realisateur'], 
+                         ['film.titre', 'film.date', 'film.realisateur']),
+    PrimaryKeyConstraint('film_titre', 'film_date', 'film_realisateur', 'langue_id')
 )
 
 # Define your classes
@@ -60,7 +69,7 @@ class Film(Base):
     date = Column(date_type, primary_key=True)
     duree = Column(Integer)
     descriptions = Column(String)
-    realisateur = Column(String, ForeignKey('acteurs.acteur_id'), primary_key=True)
+    realisateur = Column(String, primary_key=True)
     public = Column(String)
     pays = Column(String)
     url_image = Column(String)
