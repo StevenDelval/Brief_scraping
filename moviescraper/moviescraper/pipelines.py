@@ -10,6 +10,7 @@ import locale
 import re
 from itemadapter import ItemAdapter
 from sqlalchemy.orm import sessionmaker
+from sqlalchemy.exc import IntegrityError
 from .models import Film, Acteur, Genre, Langue, engine, film_acteur, film_genre, film_langue
 from scrapy.exceptions import DropItem
 
@@ -93,74 +94,100 @@ class MoviescraperPipeline:
 
 class SQLAlchemyPipeline(object):
     def __init__(self):
-        self.Session = sessionmaker(bind=engine)
+        self.Session = sessionmaker(bind=engine,autoflush=False)
 
     def process_item(self, item, spider):
         session = self.Session()
         try:
-            film = Film(
+            # Check if film already exists
+            existing_film = session.query(Film).filter_by(
                 titre=item['titre'],
-                titre_original=item['titre_original'],
-                score=item['score'],
                 date=item['date'],
-                duree=item['duree'],
-                descriptions=item['descriptions'],
-                realisateur=item['realisateur'],
-                public=item['public'],
-                pays=item['pays'],
-                url_image=item['url_image']
-            )
+                realisateur=item['realisateur']
+            ).first()
+
+            if existing_film:
+                film = existing_film
+            else:
+                film = Film(
+                    titre=item['titre'],
+                    titre_original=item['titre_original'],
+                    score=item['score'],
+                    date=item['date'],
+                    duree=item['duree'],
+                    descriptions=item['descriptions'],
+                    realisateur=item['realisateur'],
+                    public=item['public'],
+                    pays=item['pays'],
+                    url_image=item['url_image']
+                )
+                session.add(film)
+                session.commit()
+
+            # Add actors
+            acteur_list = []
+            for acteur_item in item["acteurs"].split(", "):
+                acteur_item_split = acteur_item.split(" ")
+                acteur_first_name = " ".join(acteur_item_split[:-1])
+                acteur_last_name = acteur_item_split[-1]
+
+                acteur = session.query(Acteur).filter_by(
+                    acteur_first_name=acteur_first_name,
+                    acteur_last_name=acteur_last_name
+                ).first()
+
+                if not acteur:
+                    acteur = Acteur(
+                        acteur_first_name=acteur_first_name,
+                        acteur_last_name=acteur_last_name
+                    )
+                    session.add(acteur)
+                    session.commit()
+
+                acteur_list.append(acteur)
+            
+            # Add genres
+            genre_list = []
+            for genre_item in item["genre"].split(", "):
+                genre = session.query(Genre).filter_by(genre_name=genre_item).first()
+                
+                if not genre:
+                    genre = Genre(genre_name=genre_item)
+                    session.add(genre)
+                    session.commit()
+                
+                genre_list.append(genre)
+
+            # Add languages
+            langue_list = []
+            for langue_item in item["langue"].split(", "):
+                langue = session.query(Langue).filter_by(langue_name=langue_item).first()
+                
+                if not langue:
+                    langue = Langue(langue_name=langue_item)
+                    session.add(langue)
+                    session.commit()
+                
+                langue_list.append(langue)
+
+            # Add relations
+
+            film.genres = genre_list
+            film.langues = langue_list
+            film.acteurs = acteur_list
+
             session.add(film)
             session.commit()
+
+        except IntegrityError as e:
+            session.rollback()
+            print(f"Error saving item due to integrity error: {e}")
+            raise DropItem(f"Error saving item due to integrity error: {e}")
         except Exception as e:
             session.rollback()
-            print(f"Error saving item: {e}")
-            raise DropItem(f"Error saving item: {e}")
-        
-        for acteur_item in item["acteurs"].split(", "):
-            acteur_item_split = acteur_item.split(" ")
-            try:
-                acteur = Acteur(
-                     acteur_first_name=str("".join(acteur_item_split[0:-1])),
-                     acteur_last_name=str(acteur_item_split[-1]),
-                )
-                session.add(acteur)
-                session.commit()
-            except Exception as e:
-                session.rollback()
-                print(f"Error saving item: {e}")
-                raise DropItem(f"Error saving item: {e}")
-            finally:
-                continue
-            
-        for genre_item in item["genre"].split(", "):
-            print(genre_item)
-            try:
-                genre = Genre(
-                     genre_name=genre_item,
-                )
-                session.add(genre)
-                session.commit()
-            except Exception as e:
-                session.rollback()
-                print(f"Error saving item: {e}")
-                raise DropItem(f"Error saving item: {e}")
-            finally:
-                continue
-        for langue_item in item["langue"].split(", "):
-            print(langue_item)
-            try:
-                langue = Langue(
-                     langue_name=langue_item,
-                )
-                session.add(langue)
-                session.commit()
-            except Exception as e:
-                session.rollback()
-                print(f"Error saving item: {e}")
-                raise DropItem(f"Error saving item: {e}")
-            finally:
-                continue
-        session.close()
-        
+            print(f"Error processing item: {e}")
+            raise DropItem(f"Error processing item: {e}")
+        finally:
+            session.close()
+
         return item
