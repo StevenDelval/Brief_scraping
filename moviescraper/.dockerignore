@@ -24,3 +24,4 @@ docker-compose*
 .vscode
 
 .env
+__pycache__
