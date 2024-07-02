@@ -25,3 +25,8 @@ docker-compose*
 
 .env
 __pycache__
+
+*.tf
+*.tfvars
+.terraform
+*.tfstate
