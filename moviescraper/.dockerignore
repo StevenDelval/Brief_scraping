@@ -26,7 +26,13 @@ docker-compose*
 .env
 __pycache__
 
+# Ignore all .tf files
 *.tf
+
+# Ignore .terraform directory
+.terraform/
+
+# Optionally, ignore Terraform state files
 *.tfvars
-.terraform
 *.tfstate
+*.tfstate.backup
