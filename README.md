@@ -24,3 +24,11 @@ terraform apply -var-file="terraform.tfvars"
 terraform plan -destroy -out main.destroy.tfplan
 terraform apply main.destroy.tfplan
 ```
+
+```
+docker build -t scrapingallocine .
+docker run --env-file .env -v $(pwd):/app/moviescraper --rm  scrapingallocine
+az acr login --name containerregistrydelval
+docker tag scrapingallocine containerregistrydelval.azurecr.io/samples/scrapingallocine
+docker push containerregistrydelval.azurecr.io/samples/scrapingallocine
+```
