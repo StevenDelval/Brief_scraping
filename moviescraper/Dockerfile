@@ -26,4 +26,4 @@ EXPOSE 8000
 
 WORKDIR /app/moviescraper
 
-CMD scrapy crawl allocine -O ./data/myscrapeddata.csv
+CMD scrapy crawl allocine 
