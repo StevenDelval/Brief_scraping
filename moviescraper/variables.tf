@@ -44,3 +44,8 @@ variable "container_registry_name" {
   type        = string
   description = "The container registry name."
 }
+
+variable "image_name" {
+  type        = string
+  description = "The image docker name."
+}
