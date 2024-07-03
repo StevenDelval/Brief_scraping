@@ -44,7 +44,7 @@ def convert_date(date_str):
     # Convertir la chaîne de caractères en objet datetime
     date_obj = datetime.strptime(date_str, "%d %B %Y")
     # Formater l'objet datetime en chaîne de caractères au format dd/mm/yyyy
-    formatted_date = date_obj.strftime("%d-%m-%Y")
+    formatted_date = date_obj.strftime("%Y-%m-%d")
     return formatted_date
 
 class MoviescraperPipeline:
