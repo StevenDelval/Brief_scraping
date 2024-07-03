@@ -66,6 +66,8 @@ resource "azurerm_container_group" "container_group" {
   location            = azurerm_resource_group.rg.location
   ip_address_type     = "Public"
   os_type             = "Linux"
+  restart_policy      = "Never"
+
   image_registry_credential{
     server = azurerm_container_registry.acr.login_server
     username = azurerm_container_registry.acr.admin_username
