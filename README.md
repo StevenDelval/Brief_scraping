@@ -18,7 +18,7 @@ scrapy crawl allocine -O myscrapeddata.csv
 # Cree les ressources
 terraform init -upgrade
 terraform plan -var-file="terraform.tfvars" -out main.tfplan
-terraform apply -var-file="terraform.tfvars"
+terraform apply -var-file="terraform.tfvars" -auto-approve
 
 # Supprimer les ressources
 terraform plan -destroy -out main.destroy.tfplan
