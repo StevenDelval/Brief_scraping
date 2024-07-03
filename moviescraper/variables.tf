@@ -49,3 +49,39 @@ variable "image_name" {
   type        = string
   description = "The image docker name."
 }
+
+variable "container_group_name" {
+  type        = string
+  description = "The container group name."
+}
+
+variable "container_name" {
+  type        = string
+  description = "The container name."
+}
+
+variable "IS_POSTGRES" {
+  type        = string
+  description = "Variable env fo container : If Postgres database is used."
+}
+
+variable "DB_USERNAME" {
+  type        = string
+  description = "Variable env fo container : Postgres username."
+}
+
+
+variable "DB_PORT" {
+  type        = string
+  description = "Variable env fo container : Postgres port."
+}
+
+variable "DB_NAME" {
+  type        = string
+  description = "Variable env fo container : Postgres database name."
+}
+
+variable "DB_PASSWORD" {
+  type        = string
+  description = "Variable env fo container : Postgres password."
+}
