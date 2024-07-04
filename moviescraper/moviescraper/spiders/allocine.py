@@ -41,4 +41,18 @@ class AllocinespiderSpider(CrawlSpider):
         item["url_image"] = ''.join(response.xpath("//div[@class='card entity-card entity-card-list cf entity-card-player-ovw']/figure/a/img/@src").extract())
         item["langue"] = ', '.join(response.xpath("//div[@class='item']/span[contains(text(), 'Langues')]/following-sibling::span[1]/text()").extract())
         
+        casting_link = response.xpath("//a[@class='xXx roller-item' and @title='Casting']/@href").extract_first()
+        if casting_link:
+            casting_url = response.urljoin(casting_link)
+            request = scrapy.Request(casting_url, callback=self.parse_casting)
+            request.meta['item'] = item
+            yield request
+        else:
+            yield item
+
+        
+    def parse_casting(self, response):
+        item = response.meta['item']
+        item["acteurs"] = ', '.join(response.xpath("//a[contains(@href, '/personne/')]/text()").extract())
         yield item
+
